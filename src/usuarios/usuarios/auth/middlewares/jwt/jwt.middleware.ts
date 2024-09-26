@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from 'src/usuarios/auth.service';
+import { AuthService } from 'src/usuarios/auth/auth.service';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 
 @Injectable()

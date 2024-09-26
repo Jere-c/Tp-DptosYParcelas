@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsuarioEntity } from './usuario.entity';
 import { UsuarioDto } from './usuario.dto';
 import { QueryFailedError, Repository } from 'typeorm';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 import { number } from 'joi';
 import { LoginDto } from './login.dto';
 
