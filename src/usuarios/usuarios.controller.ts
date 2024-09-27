@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { json } from 'stream/consumers';
-import { response, Response } from 'express';
+import { Response } from 'express';
 import { UsuarioDto } from './usuario.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { LoginDto } from './login.dto';
@@ -24,6 +24,12 @@ export class UsuariosController {
     async login(@Body() credenciales: LoginDto, @Res() res: Response) {
         const token = await this.usuarioService.login(credenciales);
         res.status(HttpStatus.OK).json({ ok: true, token, msg: 'approved' });
+    }
+
+    @Get(':id')
+    async getOne(@Param('id') id: number, @Res() response:Response){
+        const usuario = await this.usuarioService.getOne(id);
+        response.status(HttpStatus.OK).json( {ok: true, usuario, msg:'Approved'});
     }
 
 

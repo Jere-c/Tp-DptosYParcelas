@@ -7,14 +7,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsuariosService } from './usuarios/usuarios.service';
 import { JwtMiddleware } from './usuarios/auth/middlewares/jwt.middleware';
 import { dbConfig } from './config';
+import { ParcelasModule } from './Stays/parcelas/parcelas.module';
+import { IngresosModule } from './Stays/ingresos/ingresos.module';
 
 
 @Module({
-  imports: [TypeOrmModule.forRoot(dbConfig) ,UsuariosModule],
+  imports: [TypeOrmModule.forRoot(dbConfig),
+    UsuariosModule,
+    ParcelasModule,
+    IngresosModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(JwtMiddleware).exclude(
       {
