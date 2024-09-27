@@ -9,6 +9,8 @@ import { JwtMiddleware } from './usuarios/auth/middlewares/jwt.middleware';
 import { dbConfig } from './config';
 import { ParcelasModule } from './Stays/parcelas/parcelas.module';
 import { IngresosModule } from './Stays/ingresos/ingresos.module';
+import { DeptosModule } from './Stays/deptos/deptos.module';
+import { ReservasModule } from './Stays/reservas/reservas.module';
 
 
 @Module({
@@ -16,6 +18,8 @@ import { IngresosModule } from './Stays/ingresos/ingresos.module';
     UsuariosModule,
     ParcelasModule,
     IngresosModule,
+    DeptosModule,
+    ReservasModule
   ],
   controllers: [AppController],
   providers: [AppService],
