@@ -44,52 +44,43 @@ export class IngresosService {
 
     }
 
-    async desocuparParcela(usuarioId: number, parcelaId: number, ingresoId: number): Promise<IngresoDto>{
+    async desocuparParcela(usuarioId: number, parcelaId: number, ingresoId: number): Promise<IngresoDto> {
         const parcelaExists = await this.parcelaRepository.findOne({ where: { id: parcelaId } }) //Busca que exista la parcela y usuario con la id 
 
         if (!parcelaExists) { throw new NotFoundException(`No se encontró una parcela con la id: ${parcelaId}`) }
         if (!parcelaExists.ocupado) { throw new NotFoundException(`Se encontró la parcela(id:${parcelaId}), pero está desocupada`) }
 
+
+        //Busca si existe el ingreso
         const ingresoExists = await this.ingresoRepository.findOne({ where: { id: ingresoId }, relations: ['usuario', 'parcela'] })
         if (!ingresoExists) throw new NotFoundException(`No se encontró el ingreso con id ${ingresoId}`)
 
         const usuarioExists = await this.usuarioRepository.findOne({ where: { id: usuarioId } })
 
-        if(!usuarioExists) throw new NotFoundException(`No se encontró el usuario con id:${usuarioId}`);
+        if (!usuarioExists) throw new NotFoundException(`No se encontró el usuario con id:${usuarioId}`);
 
-        if(ingresoExists.parcela.id !== parcelaId){
+        //Verificamso si existe la parcela dentro del ingreso
+        if (ingresoExists.parcela.id !== parcelaId) {
             throw new NotFoundException(
                 `La parcela con el id ${parcelaId} no se encuentra en el ingreso ${ingresoId}`
             );
         }
 
-        if(ingresoExists.usuario.id !== usuarioId){
+        //Verificamos si existe el usuario dentro del ingreso
+        if (ingresoExists.usuario.id !== usuarioId) {
             throw new NotFoundException(
                 `El usuario con id ${usuarioId} no se encuentra en el ingreso ${ingresoId}`
             );
         }
 
-        const salida = (ingresoExists.usuario.id == usuarioId && ingresoExists.parcela.id == parcelaId)
 
-        if(salida){
+        const salida = (ingresoExists.usuario.id == usuarioId && ingresoExists.parcela.id == parcelaId)
+        //Verificamos que el usuario y la parcela coincidan con el ingreso y si existe actualizamos el ingreso y el estado de "ocupado" de la parcela con el degrade()
+        if (salida) {
             this.parcelaService.degrade(parcelaId);
-            this.ingresoRepository.update(ingresoId, {egreso: new Date()});
+            this.ingresoRepository.update(ingresoId, { egreso: new Date() });
         }
         return
-    }
-
-    async deupdate(parcelaId: number){
-        try{
-            const egreso = await this.ingresoRepository.findOne({where:{id:parcelaId}})
-            if(!egreso) throw new NotFoundException('No se encontro una parcela con id')
-            await this.ingresoRepository.update(parcelaId, {egreso: new Date()});
-        return egreso;
-        }catch (err) {
-            console.error(err);
-            if (err instanceof QueryFailedError)
-                throw new HttpException(`${err.name} ${err.driverError}`, 404);
-            throw new HttpException(err.message, err.status);
-        }
     }
 
 
