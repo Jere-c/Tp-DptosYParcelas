@@ -51,43 +51,56 @@ export class ReservasService {
         return this.reservaRepository.save(reserva)
     }
 
-    async aceptarReserva(id: number, token?: string){
-        try{
+    async aceptarReserva(id: number, token?: string) {
 
-            const decodeUser = await this.authService.verifyJwt(token);
-            const rol: Role = decodeUser.rol; 
+        const decodeUser = await this.authService.verifyJwt(token);
+        const rol: Role = decodeUser.rol;
 
-            const reserva = await this.reservaRepository.findOne({where:{id}})
+        const reserva = await this.reservaRepository.findOne({ where: { id } })
+        if (!reserva) throw new UnauthorizedException(`No se encontró la reserva con id ${id}`)
 
-            if(rol == Role.ADMIN){
-                await this.reservaRepository.update(reserva, {estado: Estado.APROBADA})
-            } else {
-                throw new UnauthorizedException('No es admin')
+        const reservaAprobada = await this.reservaRepository.findOne(
+            {
+                where:{
+                    id,
+                    estado: Estado.APROBADA,
+                }
             }
-        }catch (error) {
-            console.error(error);
-            throw new UnauthorizedException('Error en el service')
+        )
+
+        if(reservaAprobada) throw new UnauthorizedException(`Esta reserva ya está aprobada`)
+
+        if (rol == Role.ADMIN) {
+            await this.reservaRepository.update(reserva, { estado: Estado.APROBADA })
+        } else {
+            throw new UnauthorizedException('No es admin')
         }
     }
 
-    async rechazarReserva(id: number, token?: string){
-        try {
+    async rechazarReserva(id: number, token?: string) {
+        const decodeUser = await this.authService.verifyJwt(token);
+        const rol: Role = decodeUser.rol;
+
+        const reserva = await this.reservaRepository.findOne({ where: { id } });
+        if (!reserva) throw new UnauthorizedException(`No se encontró la reserva con id ${id}`)
+
             
-            const decodeUser = await this.authService.verifyJwt(token);
-            const rol: Role = decodeUser.rol;
-
-            const reserva=  await this.reservaRepository.findOne({where:{id}});
-            if(!reserva) throw new UnauthorizedException(`No se encontró la reserva con id ${id}`)
-
-            if(rol == Role.ADMIN){
-                await this.reservaRepository.update(reserva,{estado: Estado.DESAPROBADA})
-            } else{
-                throw new UnauthorizedException('No es admin')
+        const reservaRechazada = await this.reservaRepository.findOne(
+            {
+                where:{
+                    id,
+                    estado: Estado.DESAPROBADA,
+                }
             }
+        )
 
-        } catch (error) {
-            console.error(error);
-            throw new UnauthorizedException('Error en el service')
+        if(reservaRechazada) throw new UnauthorizedException(`Esta reserva ya está rechazada`)
+
+
+        if (rol == Role.ADMIN) {
+            await this.reservaRepository.update(reserva, { estado: Estado.DESAPROBADA })
+        } else {
+            throw new UnauthorizedException('No es admin')
         }
     }
 }

@@ -1,5 +1,6 @@
-import { Body, Controller, Param, Patch, Post, Headers, Req, ParseIntPipe, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, Headers, Req, ParseIntPipe, UnauthorizedException, Res, HttpStatus } from '@nestjs/common';
 import { ReservasService } from './reservas.service';
+import { Response } from 'express';
 
 @Controller('reservas')
 export class ReservasController {
@@ -12,21 +13,17 @@ export class ReservasController {
     }
 
     @Patch(':id/aceptar')
-    async aceptarReservas(@Param('id', ParseIntPipe) id: number, @Headers('Authorization') token: string) {
-        try {
-            await this.reservasService.aceptarReserva(id, token);
-        } catch (error) {
-            return error
-        }
+    async aceptarReservas(@Param('id', ParseIntPipe) id: number, @Headers('Authorization') token: string,
+        @Res() response: Response) {
+        const result = await this.reservasService.aceptarReserva(id, token);
+        response.status(HttpStatus.OK).json({ ok: true, result, msg: 'Se acepto la solicitud de reserva' })
     }
 
     @Patch(':id/rechazar')
-    async rechazarReservas(@Param('id', ParseIntPipe) id: number, @Headers('Authorization') token: string) {
-        try{
-            await this.reservasService.rechazarReserva(id, token);
-        } catch (error){
-            return error
-        }
+    async rechazarReservas(@Param('id', ParseIntPipe) id: number, @Headers('Authorization') token: string,
+        @Res() response: Response) {
+        const result = await this.reservasService.rechazarReserva(id, token);
+        response.status(HttpStatus.OK).json({ ok: true, result, msg: 'Se rechazo la solicitud de reserva' })
     }
 
 }
