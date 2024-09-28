@@ -35,6 +35,14 @@ export class AppModule implements NestModule {
         path: '/usuarios/auth/register',
         method: RequestMethod.POST
       },
+      {
+        path: 'reservas/:id/aceptar',
+        method: RequestMethod.PATCH,
+      },
+      {
+        path: 'reservas/:id/rechazar',
+        method: RequestMethod.PATCH,
+      },
     ).forRoutes('');
   }
 }
