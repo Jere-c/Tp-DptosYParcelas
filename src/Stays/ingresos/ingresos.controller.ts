@@ -1,6 +1,7 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Query, Res } from '@nestjs/common';
 import { IngresosService } from './ingresos.service';
 import { response, Response } from 'express';
+import { PaginationQueryDto } from 'src/common/pagination.dto';
 
 @Controller('ingresos')
 export class IngresosController {
@@ -19,8 +20,9 @@ export class IngresosController {
         const parcela = this.ingresosService.desocuparParcela(usuarioId, parcelaId, ingresoId);
         response.status(HttpStatus.OK).json({ ok: true, parcela, msg: 'approved' })
     }
-    async update() {
-
-
+    @Get('/')
+    async getAll(@Query() paginationQuery: PaginationQueryDto, @Res() response: Response) {
+        const ingresos = await this.ingresosService.getAll(paginationQuery);
+        response.status(HttpStatus.OK).json({ ok: true, ingresos, msg: 'approved' })
     }
 }

@@ -8,6 +8,7 @@ import { ParcelaDto } from '../parcelas/parcelas.dto';
 import { UsuarioEntity } from 'src/usuarios/usuario.entity';
 import { UsuarioDto } from 'src/usuarios/usuario.dto';
 import { ParcelasService } from '../parcelas/parcelas.service';
+import { PaginationQueryDto } from 'src/common/pagination.dto';
 
 @Injectable()
 export class IngresosService {
@@ -81,6 +82,29 @@ export class IngresosService {
             this.ingresoRepository.update(ingresoId, { egreso: new Date() });
         }
         return
+    }
+
+    async getAll(paginationQueryDto: PaginationQueryDto): Promise<{
+        data: IngresoDto[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const { page = 1, limit = 10 } = paginationQueryDto;
+        try {
+            const [ingresos, total] = await this.ingresoRepository.findAndCount({
+                skip: (page - 1) * limit,
+                take: limit
+            })
+            const ingreso = await this.ingresoRepository.find();
+            if (!ingreso) throw new NotFoundException('No encontramos ningun ingreso')
+            return { data: ingresos, total, page, limit };
+        } catch (err) {
+            console.log(err)
+            if(err instanceof QueryFailedError)
+                throw new HttpException(`${err.name} ${err.driverError}`,404);
+            throw new HttpException(err.message, err.status)
+        }
     }
 
 

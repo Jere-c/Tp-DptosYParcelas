@@ -1,5 +1,5 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { In, LessThanOrEqual, MoreThanOrEqual, QueryFailedError, Repository } from 'typeorm';
 import { ReservasDto } from './reservas.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Departamentos } from '../deptos/deptos.entity';
@@ -8,6 +8,7 @@ import { DepartamentosDto } from '../deptos/deptos.dto';
 import { Role, UsuarioEntity } from 'src/usuarios/usuario.entity';
 import { UsuarioDto } from 'src/usuarios/usuario.dto';
 import { AuthService } from 'src/usuarios/auth/auth.service';
+import { PaginationQueryDto } from 'src/common/pagination.dto';
 
 
 @Injectable()
@@ -101,6 +102,29 @@ export class ReservasService {
             await this.reservaRepository.update(reserva, { estado: Estado.DESAPROBADA })
         } else {
             throw new UnauthorizedException('No es admin')
+        }
+    }
+
+    async getAll(paginationQueryDto: PaginationQueryDto): Promise<{
+        data: ReservasDto[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const { page = 1, limit = 10 } = paginationQueryDto;
+        try {
+            const [reservas, total] = await this.reservaRepository.findAndCount({
+                skip: (page - 1) * limit,
+                take: limit
+            })
+            const reserva = await this.reservaRepository.find();
+            if (!reserva) throw new NotFoundException('No encontramos ninguna reserva')
+            return { data: reservas, total, page, limit };
+        } catch (err) {
+            console.log(err)
+            if(err instanceof QueryFailedError)
+                throw new HttpException(`${err.name} ${err.driverError}`,404);
+            throw new HttpException(err.message, err.status)
         }
     }
 }

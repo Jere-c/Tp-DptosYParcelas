@@ -1,6 +1,7 @@
-import { Body, Controller, Param, Patch, Post, Headers, Req, ParseIntPipe, UnauthorizedException, Res, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, Headers, Req, ParseIntPipe, UnauthorizedException, Res, HttpStatus, Query, Get } from '@nestjs/common';
 import { ReservasService } from './reservas.service';
 import { Response } from 'express';
+import { PaginationQueryDto } from 'src/common/pagination.dto';
 
 @Controller('reservas')
 export class ReservasController {
@@ -26,4 +27,9 @@ export class ReservasController {
         response.status(HttpStatus.OK).json({ ok: true, result, msg: 'Se rechazo la solicitud de reserva' })
     }
 
+    @Get('/')
+    async getAll(@Query() paginationQuery: PaginationQueryDto, @Res() response: Response) {
+        const reservas = await this.reservasService.getAll(paginationQuery);
+        response.status(HttpStatus.OK).json({ ok: true, reservas, msg: 'approved' })
+    }
 }

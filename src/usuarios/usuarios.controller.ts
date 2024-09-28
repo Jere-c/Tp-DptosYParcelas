@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { json } from 'stream/consumers';
 import { Response } from 'express';
 import { UsuarioDto } from './usuario.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { LoginDto } from './login.dto';
+import { PaginationQueryDto } from 'src/common/pagination.dto';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -50,5 +51,11 @@ export class UsuariosController {
             encoding: '7bit',
             mimetype: 'image/png'
         }]
+    }
+
+    @Get('/')
+    async getAll(@Query() paginationQuery: PaginationQueryDto, @Res() response:Response){
+        const usuarios = await this.usuarioService.getAll(paginationQuery);
+    response.status(HttpStatus.OK).json({ok:true, usuarios, msg:'approved'})
     }
 }

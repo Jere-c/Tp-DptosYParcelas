@@ -6,6 +6,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { AuthService } from './auth/auth.service';
 import { number } from 'joi';
 import { LoginDto } from './login.dto';
+import { PaginationQueryDto } from 'src/common/pagination.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -76,6 +77,30 @@ export class UsuariosService {
             if (err instanceof QueryFailedError)
                 throw new HttpException('${err.name} ${err.driverError}', 404);
             throw new HttpException(err.messege, err.status);
+        }
+    }
+    
+    
+    async getAll(paginationQueryDto: PaginationQueryDto): Promise<{
+        data: UsuarioDto[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const { page = 1, limit = 10 } = paginationQueryDto;
+        try {
+            const [usuarios, total] = await this.repo.findAndCount({
+                skip: (page - 1) * limit,
+                take: limit
+            })
+            const usuario = await this.repo.find();
+            if (!usuario) throw new NotFoundException('No encontramos ninguna usuario')
+            return { data: usuarios, total, page, limit };
+        } catch (err) {
+            console.log(err)
+            if(err instanceof QueryFailedError)
+                throw new HttpException(`${err.name} ${err.driverError}`,404);
+            throw new HttpException(err.message, err.status)
         }
     }
 
